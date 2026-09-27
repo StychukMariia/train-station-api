@@ -23,5 +23,4 @@ urlpatterns = [
         "api/train_station/",
         include("train_station.urls", namespace="train_station")
     ),
-    path("__debug__/", include("debug_toolbar.urls")),
 ]
