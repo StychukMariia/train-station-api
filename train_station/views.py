@@ -2,6 +2,7 @@ import datetime
 
 from django.db.models import F, Count
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
 
 from train_station.models import (
     Station,
@@ -12,6 +13,7 @@ from train_station.models import (
     Journey,
     Order,
 )
+from train_station.permissions import IsAdminOrIfAuthenticatedReadOnly
 from train_station.serializers import (
     StationSerializer,
     RouteSerializer,
@@ -32,6 +34,7 @@ from train_station.serializers import (
 class StationViewSet(viewsets.ModelViewSet):
     queryset = Station.objects.all()
     serializer_class = StationSerializer
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
 
 class RouteViewSet(viewsets.ModelViewSet):
@@ -39,6 +42,7 @@ class RouteViewSet(viewsets.ModelViewSet):
         "source", "destination"
     )
     serializer_class = RouteSerializer
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
     def get_queryset(self):
         source_id_str = self.request.query_params.get("source")
@@ -71,11 +75,13 @@ class RouteViewSet(viewsets.ModelViewSet):
 class TrainTypeViewSet(viewsets.ModelViewSet):
     queryset = TrainType.objects.all()
     serializer_class = TrainTypeSerializer
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
 
 class TrainViewSet(viewsets.ModelViewSet):
     queryset = Train.objects.all().select_related("train_type")
     serializer_class = TrainSerializer
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
     def get_queryset(self):
         name = self.request.query_params.get("name")
@@ -105,6 +111,7 @@ class TrainViewSet(viewsets.ModelViewSet):
 class CrewViewSet(viewsets.ModelViewSet):
     queryset = Crew.objects.all()
     serializer_class = CrewSerializer
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
 
 class JourneyViewSet(viewsets.ModelViewSet):
@@ -126,6 +133,7 @@ class JourneyViewSet(viewsets.ModelViewSet):
         )
     )
     serializer_class = JourneySerializer
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
     def get_queryset(self):
         departure_date = self.request.query_params.get(
@@ -155,6 +163,7 @@ class JourneyViewSet(viewsets.ModelViewSet):
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
+    permission_classes = (IsAuthenticated,)
 
     def get_serializer_class(self):
         if self.action == "list":
