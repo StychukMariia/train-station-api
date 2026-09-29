@@ -1,6 +1,7 @@
-from django.contrib.auth.models import User
 from django.db import models
 from rest_framework.exceptions import ValidationError
+
+from core import settings
 
 
 class Station(models.Model):
@@ -95,7 +96,7 @@ class Journey(models.Model):
 class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     user =models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="orders"
     )
