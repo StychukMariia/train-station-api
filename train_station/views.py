@@ -1,7 +1,7 @@
 import datetime
 
 from django.db.models import F, Count
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
 from rest_framework.permissions import IsAuthenticated
 
 from train_station.models import (
@@ -31,13 +31,22 @@ from train_station.serializers import (
 )
 
 
-class StationViewSet(viewsets.ModelViewSet):
+class StationViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = Station.objects.all()
     serializer_class = StationSerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
 
-class RouteViewSet(viewsets.ModelViewSet):
+class RouteViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = Route.objects.all().select_related(
         "source", "destination"
     )
@@ -72,13 +81,22 @@ class RouteViewSet(viewsets.ModelViewSet):
         return RouteSerializer
 
 
-class TrainTypeViewSet(viewsets.ModelViewSet):
+class TrainTypeViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = TrainType.objects.all()
     serializer_class = TrainTypeSerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
 
-class TrainViewSet(viewsets.ModelViewSet):
+class TrainViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = Train.objects.all().select_related("train_type")
     serializer_class = TrainSerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
@@ -108,7 +126,11 @@ class TrainViewSet(viewsets.ModelViewSet):
         return TrainSerializer
 
 
-class CrewViewSet(viewsets.ModelViewSet):
+class CrewViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = Crew.objects.all()
     serializer_class = CrewSerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
@@ -160,7 +182,12 @@ class JourneyViewSet(viewsets.ModelViewSet):
         return JourneySerializer
 
 
-class OrderViewSet(viewsets.ModelViewSet):
+class OrderViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
     permission_classes = (IsAuthenticated,)
