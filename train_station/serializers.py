@@ -48,6 +48,11 @@ class TrainTypeSerializer(serializers.ModelSerializer):
 
 class TrainSerializer(serializers.ModelSerializer):
     train_type = TrainTypeSerializer(many=False, read_only=True)
+    train_type_id = serializers.PrimaryKeyRelatedField(
+        queryset=TrainType.objects.all(),
+        source="train_type",
+        write_only=True
+    )
 
     class Meta:
         model = Train
@@ -57,7 +62,8 @@ class TrainSerializer(serializers.ModelSerializer):
             "cargo_num",
             "place_in_cargo",
             "capacity",
-            "train_type"
+            "train_type",
+            "train_type_id",
         )
 
 
