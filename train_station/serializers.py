@@ -109,7 +109,7 @@ class JourneyListSerializer(JourneySerializer):
         source="train.capacity",
         read_only=True
     )
-    tickets_available = serializers.IntegerField()
+    tickets_available = serializers.SerializerMethodField()
     crews = serializers.SlugRelatedField(
         many=True,
         read_only=True,
@@ -129,6 +129,14 @@ class JourneyListSerializer(JourneySerializer):
             "arrival_date",
             "crews"
         )
+
+    def get_tickets_available(self, obj):
+        if hasattr(obj, "tickets_available"):
+            return obj.tickets_available
+
+        booked_tickets = obj.tickets.count()
+        total_places = obj.train.cargo_num * obj.train.place_in_cargo
+        return total_places - booked_tickets
 
 
 class TicketSerializer(serializers.ModelSerializer):
