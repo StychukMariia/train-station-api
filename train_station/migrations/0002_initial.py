@@ -10,53 +10,85 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('train_station', '0001_initial'),
+        ("train_station", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='order',
-            name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='orders', to=settings.AUTH_USER_MODEL),
+            model_name="order",
+            name="user",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="orders",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='journey',
-            name='route',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='journeys', to='train_station.route'),
+            model_name="journey",
+            name="route",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="journeys",
+                to="train_station.route",
+            ),
         ),
         migrations.AddField(
-            model_name='route',
-            name='destination',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='routes_to', to='train_station.station'),
+            model_name="route",
+            name="destination",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="routes_to",
+                to="train_station.station",
+            ),
         ),
         migrations.AddField(
-            model_name='route',
-            name='source',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='routes_from', to='train_station.station'),
+            model_name="route",
+            name="source",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="routes_from",
+                to="train_station.station",
+            ),
         ),
         migrations.AddField(
-            model_name='ticket',
-            name='journey',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tickets', to='train_station.journey'),
+            model_name="ticket",
+            name="journey",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="tickets",
+                to="train_station.journey",
+            ),
         ),
         migrations.AddField(
-            model_name='ticket',
-            name='order',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='tickets', to='train_station.order'),
+            model_name="ticket",
+            name="order",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="tickets",
+                to="train_station.order",
+            ),
         ),
         migrations.AddField(
-            model_name='journey',
-            name='train',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='journeys', to='train_station.train'),
+            model_name="journey",
+            name="train",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="journeys",
+                to="train_station.train",
+            ),
         ),
         migrations.AddField(
-            model_name='train',
-            name='train_type',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='trains', to='train_station.traintype'),
+            model_name="train",
+            name="train_type",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="trains",
+                to="train_station.traintype",
+            ),
         ),
         migrations.AlterUniqueTogether(
-            name='ticket',
-            unique_together={('journey', 'cargo', 'seat')},
+            name="ticket",
+            unique_together={("journey", "cargo", "seat")},
         ),
     ]

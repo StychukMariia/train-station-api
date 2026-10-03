@@ -50,9 +50,7 @@ class PublicUserApiTests(APITestCase):
 
 class PrivateUserApiTests(APITestCase):
     def setUp(self):
-        self.user = create_user(
-            email="privateuser@test.com", password="password123"
-        )
+        self.user = create_user(email="privateuser@test.com", password="password123")
         self.client.force_authenticate(user=self.user)
 
     def test_retrieve_user_profile_success(self):

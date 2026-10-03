@@ -47,17 +47,13 @@ class RouteViewSet(
     mixins.RetrieveModelMixin,
     viewsets.GenericViewSet,
 ):
-    queryset = Route.objects.all().select_related(
-        "source", "destination"
-    )
+    queryset = Route.objects.all().select_related("source", "destination")
     serializer_class = RouteSerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
     def get_queryset(self):
         source_id_str = self.request.query_params.get("source")
-        destination_id_str = self.request.query_params.get(
-            "destination"
-        )
+        destination_id_str = self.request.query_params.get("destination")
 
         queryset = self.queryset
 
@@ -65,9 +61,7 @@ class RouteViewSet(
             queryset = queryset.filter(source_id=int(source_id_str))
 
         if destination_id_str:
-            queryset = queryset.filter(
-                destination_id=int(destination_id_str)
-            )
+            queryset = queryset.filter(destination_id=int(destination_id_str))
 
         return queryset
 
@@ -103,9 +97,7 @@ class TrainViewSet(
 
     def get_queryset(self):
         name = self.request.query_params.get("name")
-        train_type_id_str = self.request.query_params.get(
-            "train_type"
-        )
+        train_type_id_str = self.request.query_params.get("train_type")
 
         queryset = self.queryset
 
@@ -113,9 +105,7 @@ class TrainViewSet(
             queryset = queryset.filter(name__icontains=name)
 
         if train_type_id_str:
-            queryset = queryset.filter(
-                train_type_id=int(train_type_id_str)
-            )
+            queryset = queryset.filter(train_type_id=int(train_type_id_str))
 
         return queryset
 
@@ -140,17 +130,12 @@ class JourneyViewSet(viewsets.ModelViewSet):
     queryset = (
         Journey.objects.all()
         .select_related(
-            "route",
-            "route__source",
-            "route__destination",
-            "train",
-            "train__train_type"
+            "route", "route__source", "route__destination", "train", "train__train_type"
         )
         .prefetch_related("crews")
         .annotate(
             tickets_available=(
-                F("train__cargo_num") * F("train__place_in_cargo")
-                - Count("tickets")
+                F("train__cargo_num") * F("train__place_in_cargo") - Count("tickets")
             )
         )
     )
@@ -158,16 +143,12 @@ class JourneyViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
     def get_queryset(self):
-        departure_date = self.request.query_params.get(
-            "departure_date"
-        )
+        departure_date = self.request.query_params.get("departure_date")
 
         queryset = self.queryset
 
         if departure_date:
-            date = datetime.strptime(
-                departure_date, "%Y-%m-%d"
-            ).date()
+            date = datetime.strptime(departure_date, "%Y-%m-%d").date()
             queryset = queryset.filter(departure_date=date)
 
         return queryset

@@ -12,9 +12,7 @@ STATION_URL = reverse("train_station:station-list")
 class StationModelTests(APITestCase):
     def setUp(self):
         self.station = Station.objects.create(
-            name="Kyiv-Pasazhyrskyi",
-            latitude=50.4402,
-            longitude=30.4883
+            name="Kyiv-Pasazhyrskyi", latitude=50.4402, longitude=30.4883
         )
 
     def test_station_str(self):
@@ -80,7 +78,4 @@ class AdminStationApiTests(APITestCase):
 
     def test_retrieve_station_not_allowed(self):
         with self.assertRaises(NoReverseMatch):
-            reverse(
-                "train_station:station-detail",
-                args=[self.station.id]
-            )
+            reverse("train_station:station-detail", args=[self.station.id])

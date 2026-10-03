@@ -3,7 +3,15 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from train_station.models import Station, Route, TrainType, Train, Journey, Order, Ticket
+from train_station.models import (
+    Station,
+    Route,
+    TrainType,
+    Train,
+    Journey,
+    Order,
+    Ticket,
+)
 from train_station.serializers import OrderSerializer, OrderListSerializer
 
 ORDER_URL = reverse("train_station:order-list")
@@ -119,7 +127,7 @@ class AuthenticatedOrderApiTests(APITestCase):
                     "cargo": 1,
                     "seat": 16,
                     "journey": self.journey.id,
-                }
+                },
             ]
         }
         response = self.client.post(ORDER_URL, data, format="json")

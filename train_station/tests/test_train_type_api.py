@@ -67,6 +67,4 @@ class AdminTrainTypeApiTests(APITestCase):
 
     def test_retrieve_train_type_not_allowed(self):
         with self.assertRaises(NoReverseMatch):
-            reverse(
-                "train_station:traintype-detail", args=[self.train_type.id]
-            )
+            reverse("train_station:traintype-detail", args=[self.train_type.id])

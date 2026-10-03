@@ -20,9 +20,7 @@ class Route(models.Model):
         related_name="routes_from",
     )
     destination = models.ForeignKey(
-        Station,
-        on_delete=models.CASCADE,
-        related_name="routes_to"
+        Station, on_delete=models.CASCADE, related_name="routes_to"
     )
     distance = models.IntegerField()
 
@@ -73,32 +71,19 @@ class Journey(models.Model):
         on_delete=models.CASCADE,
         related_name="journeys",
     )
-    train = models.ForeignKey(
-        Train,
-        on_delete=models.CASCADE,
-        related_name="journeys"
-    )
+    train = models.ForeignKey(Train, on_delete=models.CASCADE, related_name="journeys")
     departure_date = models.DateField()
     arrival_date = models.DateField()
-    crews = models.ManyToManyField(
-        Crew,
-        blank=True,
-        related_name="journeys"
-    )
+    crews = models.ManyToManyField(Crew, blank=True, related_name="journeys")
 
     def __str__(self):
-        return (
-            f"{self.train.name} "
-            f"({self.departure_date} - {self.arrival_date})"
-        )
+        return f"{self.train.name} " f"({self.departure_date} - {self.arrival_date})"
 
 
 class Order(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
-    user =models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
-        related_name="orders"
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="orders"
     )
 
     class Meta:
@@ -112,15 +97,9 @@ class Ticket(models.Model):
     cargo = models.IntegerField()
     seat = models.IntegerField()
     journey = models.ForeignKey(
-        Journey,
-        on_delete=models.CASCADE,
-        related_name="tickets"
+        Journey, on_delete=models.CASCADE, related_name="tickets"
     )
-    order = models.ForeignKey(
-        Order,
-        on_delete=models.CASCADE,
-        related_name="tickets"
-    )
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="tickets")
 
     @staticmethod
     def validate_ticket(cargo, seat, train, error_to_raise):
@@ -160,6 +139,4 @@ class Ticket(models.Model):
         ordering = ["cargo", "seat"]
 
     def __str__(self):
-        return (
-            f"{str(self.journey)} (row: {self.cargo}, seat: {self.seat})"
-        )
+        return f"{str(self.journey)} (row: {self.cargo}, seat: {self.seat})"

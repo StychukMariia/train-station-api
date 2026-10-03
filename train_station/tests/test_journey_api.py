@@ -98,8 +98,12 @@ class AuthenticatedJourneyApiTests(APITestCase):
             email="testuser@test.com", password="testpassword123"
         )
         self.client.force_authenticate(user=self.user)
-        self.journey1 = sample_journey(departure_date="2026-10-15", arrival_date="2026-10-15")
-        self.journey2 = sample_journey(departure_date="2026-10-20", arrival_date="2026-10-20")
+        self.journey1 = sample_journey(
+            departure_date="2026-10-15", arrival_date="2026-10-15"
+        )
+        self.journey2 = sample_journey(
+            departure_date="2026-10-20", arrival_date="2026-10-20"
+        )
 
     def test_regular_user_can_list_journeys(self):
         response = self.client.get(JOURNEY_URL)

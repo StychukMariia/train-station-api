@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class TrainStationConfig(AppConfig):
-    name = 'train_station'
+    name = "train_station"

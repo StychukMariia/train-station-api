@@ -11,10 +11,7 @@ CREW_URL = reverse("train_station:crew-list")
 
 class CrewModelTests(APITestCase):
     def setUp(self):
-        self.crew = Crew.objects.create(
-            first_name="Ivan",
-            last_name="Franko"
-        )
+        self.crew = Crew.objects.create(first_name="Ivan", last_name="Franko")
 
     def test_crew_str(self):
         self.assertEqual(str(self.crew), "Ivan Franko")
@@ -70,10 +67,10 @@ class AdminCrewApiTests(APITestCase):
         response = self.client.post(CREW_URL, data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(Crew.objects.filter(first_name="Taras", last_name="Shevchenko").exists())
+        self.assertTrue(
+            Crew.objects.filter(first_name="Taras", last_name="Shevchenko").exists()
+        )
 
     def test_retrieve_crew_not_allowed(self):
         with self.assertRaises(NoReverseMatch):
-            reverse(
-                "train_station:crew-detail", args=[self.crew.id]
-            )
+            reverse("train_station:crew-detail", args=[self.crew.id])

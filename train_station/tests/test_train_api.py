@@ -45,9 +45,7 @@ class TrainModelTests(APITestCase):
 class UnauthenticatedTrainApiTests(APITestCase):
     def test_auth_required_for_list(self):
         response = self.client.get(TRAIN_URL)
-        self.assertEqual(
-            response.status_code, status.HTTP_401_UNAUTHORIZED
-        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_auth_required_for_create(self):
         train_type = sample_train_type()
@@ -58,9 +56,7 @@ class UnauthenticatedTrainApiTests(APITestCase):
             "train_type": train_type.id,
         }
         response = self.client.post(TRAIN_URL, data)
-        self.assertEqual(
-            response.status_code, status.HTTP_401_UNAUTHORIZED
-        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class AuthenticatedTrainApiTests(APITestCase):
@@ -73,12 +69,8 @@ class AuthenticatedTrainApiTests(APITestCase):
         self.train_type1 = sample_train_type(name="Electric")
         self.train_type2 = sample_train_type(name="Diesel")
 
-        self.train1 = sample_train(
-            name="Hyundai", train_type=self.train_type1
-        )
-        self.train2 = sample_train(
-            name="Skoda", train_type=self.train_type2
-        )
+        self.train1 = sample_train(name="Hyundai", train_type=self.train_type1)
+        self.train2 = sample_train(name="Skoda", train_type=self.train_type2)
 
     def test_regular_user_can_list_trains(self):
         response = self.client.get(TRAIN_URL)
@@ -89,9 +81,7 @@ class AuthenticatedTrainApiTests(APITestCase):
         self.assertEqual(response.data, serializer.data)
 
     def test_regular_user_can_retrieve_train_detail(self):
-        detail_url = reverse(
-            "train_station:train-detail", args=[self.train1.id]
-        )
+        detail_url = reverse("train_station:train-detail", args=[self.train1.id])
         response = self.client.get(detail_url)
         serializer = TrainSerializer(self.train1)
 
@@ -108,9 +98,7 @@ class AuthenticatedTrainApiTests(APITestCase):
         self.assertEqual(response.data, serializer.data)
 
     def test_filter_trains_by_train_type(self):
-        response = self.client.get(
-            TRAIN_URL, {"train_type": self.train_type1.id}
-        )
+        response = self.client.get(TRAIN_URL, {"train_type": self.train_type1.id})
         serializer = TrainListSerializer(
             Train.objects.filter(train_type=self.train_type1), many=True
         )

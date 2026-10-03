@@ -27,9 +27,7 @@ class RouteSerializer(serializers.ModelSerializer):
 
 
 class RouteListSerializer(RouteSerializer):
-    source = serializers.SlugRelatedField(
-        many=False, read_only=True, slug_field="name"
-    )
+    source = serializers.SlugRelatedField(many=False, read_only=True, slug_field="name")
     destination = serializers.SlugRelatedField(
         many=False, read_only=True, slug_field="name"
     )
@@ -49,9 +47,7 @@ class TrainTypeSerializer(serializers.ModelSerializer):
 class TrainSerializer(serializers.ModelSerializer):
     train_type = TrainTypeSerializer(many=False, read_only=True)
     train_type_id = serializers.PrimaryKeyRelatedField(
-        queryset=TrainType.objects.all(),
-        source="train_type",
-        write_only=True
+        queryset=TrainType.objects.all(), source="train_type", write_only=True
     )
 
     class Meta:
@@ -82,38 +78,19 @@ class CrewSerializer(serializers.ModelSerializer):
 class JourneySerializer(serializers.ModelSerializer):
     class Meta:
         model = Journey
-        fields = (
-            "id",
-            "route",
-            "train",
-            "departure_date",
-            "arrival_date",
-            "crews"
-        )
+        fields = ("id", "route", "train", "departure_date", "arrival_date", "crews")
 
 
 class JourneyListSerializer(JourneySerializer):
-    route_source = serializers.CharField(
-        source="route.source.name",
-        read_only=True
-    )
+    route_source = serializers.CharField(source="route.source.name", read_only=True)
     route_destination = serializers.CharField(
-        source="route.destination.name",
-        read_only=True
+        source="route.destination.name", read_only=True
     )
-    train_name = serializers.CharField(
-        source="train.name",
-        read_only=True
-    )
-    train_capacity = serializers.IntegerField(
-        source="train.capacity",
-        read_only=True
-    )
+    train_name = serializers.CharField(source="train.name", read_only=True)
+    train_capacity = serializers.IntegerField(source="train.capacity", read_only=True)
     tickets_available = serializers.SerializerMethodField()
     crews = serializers.SlugRelatedField(
-        many=True,
-        read_only=True,
-        slug_field="full_name"
+        many=True, read_only=True, slug_field="full_name"
     )
 
     class Meta:
@@ -127,7 +104,7 @@ class JourneyListSerializer(JourneySerializer):
             "tickets_available",
             "departure_date",
             "arrival_date",
-            "crews"
+            "crews",
         )
 
     def get_tickets_available(self, obj):
@@ -143,10 +120,7 @@ class TicketSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         data = super(TicketSerializer, self).validate(attrs=attrs)
         Ticket.validate_ticket(
-            attrs["cargo"],
-            attrs["seat"],
-            attrs["journey"].train,
-            ValidationError
+            attrs["cargo"], attrs["seat"], attrs["journey"].train, ValidationError
         )
         return data
 
@@ -169,9 +143,7 @@ class JourneyDetailSerializer(JourneySerializer):
     route = RouteListSerializer(many=False, read_only=True)
     train = TrainListSerializer(many=False, read_only=True)
     crews = CrewSerializer(many=True, read_only=True)
-    taken_place = TicketSeatsSerializer(
-        source="tickets", many=True, read_only=True
-    )
+    taken_place = TicketSeatsSerializer(source="tickets", many=True, read_only=True)
 
     class Meta:
         model = Journey
@@ -187,9 +159,7 @@ class JourneyDetailSerializer(JourneySerializer):
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    tickets = TicketSerializer(
-        many=True, read_only=False, allow_empty=False
-    )
+    tickets = TicketSerializer(many=True, read_only=False, allow_empty=False)
 
     class Meta:
         model = Order

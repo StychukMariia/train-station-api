@@ -27,13 +27,9 @@ def sample_route(**params):
     destination = params.pop("destination", None)
 
     if not source:
-        source = sample_station(
-            name="Kyiv", latitude=50.4, longitude=30.5
-        )
+        source = sample_station(name="Kyiv", latitude=50.4, longitude=30.5)
     if not destination:
-        destination = sample_station(
-            name="Lviv", latitude=49.8, longitude=24.0
-        )
+        destination = sample_station(name="Lviv", latitude=49.8, longitude=24.0)
 
     defaults = {
         "source": source,
@@ -70,50 +66,32 @@ class UnauthenticatedRouteApiTests(APITestCase):
             "distance": 500,
         }
         response = self.client.post(ROUTE_URL, data)
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_401_UNAUTHORIZED
-        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class AuthenticatedRouteApiTests(APITestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_user(
-            email="testuser@test.com",
-            password="testpassword123"
+            email="testuser@test.com", password="testpassword123"
         )
         self.client.force_authenticate(user=self.user)
-        self.source1 = sample_station(
-            name="Kyiv", latitude=50.4, longitude=30.5
-        )
-        self.destination1 = sample_station(
-            name="Lviv", latitude=49.8, longitude=24.0
-        )
-        self.destination2 = sample_station(
-            name="Odesa", latitude=46.4, longitude=30.7
-        )
+        self.source1 = sample_station(name="Kyiv", latitude=50.4, longitude=30.5)
+        self.destination1 = sample_station(name="Lviv", latitude=49.8, longitude=24.0)
+        self.destination2 = sample_station(name="Odesa", latitude=46.4, longitude=30.7)
 
         self.route1 = sample_route(
-            source=self.source1,
-            destination=self.destination1,
-            distance=500
+            source=self.source1, destination=self.destination1, distance=500
         )
         self.route2 = sample_route(
-            source=self.source1,
-            destination=self.destination2,
-            distance=700
+            source=self.source1, destination=self.destination2, distance=700
         )
 
     def test_regular_user_can_list_routes(self):
         response = self.client.get(ROUTE_URL)
-        routes = Route.objects.all().select_related(
-            "source", "destination"
-        )
+        routes = Route.objects.all().select_related("source", "destination")
         serializer = RouteListSerializer(routes, many=True)
 
-        self.assertEqual(
-            response.status_code, status.HTTP_200_OK
-        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data, serializer.data)
 
     def test_regular_user_can_retrieve_route_detail(self):
@@ -127,10 +105,7 @@ class AuthenticatedRouteApiTests(APITestCase):
         self.assertEqual(response.data, serializer.data)
 
     def test_filter_routes_by_source_and_destination(self):
-        response = self.client.get(
-            ROUTE_URL,
-            {"destination": self.destination1.id}
-        )
+        response = self.client.get(ROUTE_URL, {"destination": self.destination1.id})
         serializer = RouteListSerializer(
             Route.objects.filter(destination=self.destination1), many=True
         )
@@ -154,12 +129,8 @@ class AdminRouteApiTests(APITestCase):
             email="adminuser@admin.admin", password="adminpassword123"
         )
         self.client.force_authenticate(user=self.admin)
-        self.source = sample_station(
-            name="Kyiv", latitude=50.4, longitude=30.5
-        )
-        self.destination = sample_station(
-            name="Lviv", latitude=49.8, longitude=24.0
-        )
+        self.source = sample_station(name="Kyiv", latitude=50.4, longitude=30.5)
+        self.destination = sample_station(name="Lviv", latitude=49.8, longitude=24.0)
 
     def test_admin_can_create_route(self):
         data = {
