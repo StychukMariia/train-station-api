@@ -1,6 +1,8 @@
 from datetime import datetime
 
 from django.db.models import F, Count
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, mixins
 from rest_framework.permissions import IsAuthenticated
 
@@ -74,6 +76,27 @@ class RouteViewSet(
 
         return RouteSerializer
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="source",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.QUERY,
+                description="Filter routes by source station ID (e.g. ?source=1)",
+                required=False,
+            ),
+            OpenApiParameter(
+                name="destination",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.QUERY,
+                description="Filter routes by destination station ID (e.g. ?destination=2)",
+                required=False,
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
 
 class TrainTypeViewSet(
     mixins.CreateModelMixin,
@@ -114,6 +137,27 @@ class TrainViewSet(
             return TrainListSerializer
 
         return TrainSerializer
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="name",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description="Filter trains by name (e.g. ?name=Intercity)",
+                required=False,
+            ),
+            OpenApiParameter(
+                name="train_type",
+                type=OpenApiTypes.INT,
+                location=OpenApiParameter.QUERY,
+                description="Filter trains by train type ID (e.g. ?train_type=1)",
+                required=False,
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class CrewViewSet(
@@ -161,6 +205,20 @@ class JourneyViewSet(viewsets.ModelViewSet):
             return JourneyDetailSerializer
 
         return JourneySerializer
+
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="departure_date",
+                type=OpenApiTypes.DATE,
+                location=OpenApiParameter.QUERY,
+                description="Filter journeys by departure date (format: YYYY-MM-DD)",
+                required=False,
+            ),
+        ]
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class OrderViewSet(
