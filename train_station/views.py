@@ -182,6 +182,7 @@ class JourneyViewSet(viewsets.ModelViewSet):
                 F("train__cargo_num") * F("train__place_in_cargo") - Count("tickets")
             )
         )
+        .order_by("-departure_time")
     )
     serializer_class = JourneySerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
@@ -193,7 +194,7 @@ class JourneyViewSet(viewsets.ModelViewSet):
 
         if departure_date:
             date = datetime.strptime(departure_date, "%Y-%m-%d").date()
-            queryset = queryset.filter(departure_date=date)
+            queryset = queryset.filter(departure_time__date=date)
 
         return queryset
 

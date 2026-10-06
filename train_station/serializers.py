@@ -78,7 +78,7 @@ class CrewSerializer(serializers.ModelSerializer):
 class JourneySerializer(serializers.ModelSerializer):
     class Meta:
         model = Journey
-        fields = ("id", "route", "train", "departure_date", "arrival_date", "crews")
+        fields = ("id", "route", "train", "departure_time", "arrival_time", "crews")
 
 
 class JourneyListSerializer(JourneySerializer):
@@ -102,8 +102,8 @@ class JourneyListSerializer(JourneySerializer):
             "train_name",
             "train_capacity",
             "tickets_available",
-            "departure_date",
-            "arrival_date",
+            "departure_time",
+            "arrival_time",
             "crews",
         )
 
@@ -151,8 +151,8 @@ class JourneyDetailSerializer(JourneySerializer):
             "id",
             "route",
             "train",
-            "departure_date",
-            "arrival_date",
+            "departure_time",
+            "arrival_time",
             "crews",
             "taken_place",
         )

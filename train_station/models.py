@@ -72,12 +72,15 @@ class Journey(models.Model):
         related_name="journeys",
     )
     train = models.ForeignKey(Train, on_delete=models.CASCADE, related_name="journeys")
-    departure_date = models.DateField()
-    arrival_date = models.DateField()
+    departure_time = models.DateTimeField()
+    arrival_time = models.DateTimeField()
     crews = models.ManyToManyField(Crew, blank=True, related_name="journeys")
 
+    class Meta:
+        ordering = ["-departure_time"]
+
     def __str__(self):
-        return f"{self.train.name} " f"({self.departure_date} - {self.arrival_date})"
+        return f"{self.train.name} " f"({self.departure_time} - {self.arrival_time})"
 
 
 class Order(models.Model):

@@ -64,8 +64,8 @@ def sample_journey(**params):
     defaults = {
         "route": route,
         "train": train,
-        "departure_date": "2026-10-15",
-        "arrival_date": "2026-10-15",
+        "departure_time": "2026-10-15T10:00:00Z",
+        "arrival_time": "2026-10-15T14:00:00Z",
     }
     defaults.update(params)
     journey = Journey.objects.create(**defaults)
@@ -81,7 +81,7 @@ class JourneyModelTests(APITestCase):
     def test_journey_str(self):
         expected_str = (
             f"{self.journey.train.name} "
-            f"({self.journey.departure_date} - {self.journey.arrival_date})"
+            f"({self.journey.departure_time} - {self.journey.arrival_time})"
         )
         self.assertEqual(str(self.journey), expected_str)
 
@@ -99,10 +99,10 @@ class AuthenticatedJourneyApiTests(APITestCase):
         )
         self.client.force_authenticate(user=self.user)
         self.journey1 = sample_journey(
-            departure_date="2026-10-15", arrival_date="2026-10-15"
+            departure_time="2026-10-15T10:00:00Z", arrival_time="2026-10-15T14:00:00Z"
         )
         self.journey2 = sample_journey(
-            departure_date="2026-10-20", arrival_date="2026-10-20"
+            departure_time="2026-10-20T10:00:00Z", arrival_time="2026-10-20T14:00:00Z"
         )
 
     def test_regular_user_can_list_journeys(self):
@@ -124,7 +124,7 @@ class AuthenticatedJourneyApiTests(APITestCase):
     def test_filter_journeys_by_date(self):
         response = self.client.get(JOURNEY_URL, {"departure_date": "2026-10-15"})
         serializer = JourneyListSerializer(
-            Journey.objects.filter(departure_date=date(2026, 10, 15)), many=True
+            Journey.objects.filter(departure_time__date=date(2026, 10, 15)), many=True
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -145,11 +145,13 @@ class AdminJourneyApiTests(APITestCase):
         data = {
             "route": self.route.id,
             "train": self.train.id,
-            "departure_date": "2026-11-01",
-            "arrival_date": "2026-11-01",
+            "departure_time": "2026-11-01T08:00:00Z",
+            "arrival_time": "2026-11-01T12:00:00Z",
             "crews": [self.crew.id],
         }
         response = self.client.post(JOURNEY_URL, data)
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(Journey.objects.filter(departure_date="2026-11-01").exists())
+        self.assertTrue(
+            Journey.objects.filter(departure_time__date="2026-11-01").exists()
+        )
