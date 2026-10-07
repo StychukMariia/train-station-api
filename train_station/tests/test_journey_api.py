@@ -107,11 +107,11 @@ class AuthenticatedJourneyApiTests(APITestCase):
 
     def test_regular_user_can_list_journeys(self):
         response = self.client.get(JOURNEY_URL)
-        journeys = Journey.objects.all()
+        journeys = Journey.objects.all().order_by("-departure_time")
         serializer = JourneyListSerializer(journeys, many=True)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, serializer.data)
+        self.assertEqual(response.data["results"], serializer.data)
 
     def test_regular_user_can_retrieve_journey_detail(self):
         detail_url = reverse("train_station:journey-detail", args=[self.journey1.id])
@@ -123,12 +123,13 @@ class AuthenticatedJourneyApiTests(APITestCase):
 
     def test_filter_journeys_by_date(self):
         response = self.client.get(JOURNEY_URL, {"departure_date": "2026-10-15"})
-        serializer = JourneyListSerializer(
-            Journey.objects.filter(departure_time__date=date(2026, 10, 15)), many=True
-        )
+        journeys = Journey.objects.filter(
+            departure_time__date=date(2026, 10, 15)
+        ).order_by("-departure_time")
+        serializer = JourneyListSerializer(journeys, many=True)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, serializer.data)
+        self.assertEqual(response.data["results"], serializer.data)
 
 
 class AdminJourneyApiTests(APITestCase):

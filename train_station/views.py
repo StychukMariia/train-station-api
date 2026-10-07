@@ -4,6 +4,7 @@ from django.db.models import F, Count
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, mixins
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 
 from train_station.models import (
@@ -170,6 +171,11 @@ class CrewViewSet(
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
 
+class StandardPagination(PageNumberPagination):
+    page_size = 10
+    max_page_size = 100
+
+
 class JourneyViewSet(viewsets.ModelViewSet):
     queryset = (
         Journey.objects.all()
@@ -185,6 +191,7 @@ class JourneyViewSet(viewsets.ModelViewSet):
         .order_by("-departure_time")
     )
     serializer_class = JourneySerializer
+    pagination_class = StandardPagination
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
     def get_queryset(self):
@@ -230,6 +237,7 @@ class OrderViewSet(
 ):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
+    pagination_class = StandardPagination
     permission_classes = (IsAuthenticated,)
 
     def get_serializer_class(self):

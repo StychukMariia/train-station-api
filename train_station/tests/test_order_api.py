@@ -10,9 +10,8 @@ from train_station.models import (
     Train,
     Journey,
     Order,
-    Ticket,
 )
-from train_station.serializers import OrderSerializer, OrderListSerializer
+from train_station.serializers import OrderListSerializer
 
 ORDER_URL = reverse("train_station:order-list")
 
@@ -65,8 +64,8 @@ def sample_journey(**params):
     defaults = {
         "route": route,
         "train": train,
-        "departure_date": "2026-10-15",
-        "arrival_date": "2026-10-15",
+        "departure_time": "2026-10-15T10:00:00Z",
+        "arrival_time": "2026-10-15T14:00:00Z",
     }
     defaults.update(params)
     return Journey.objects.create(**defaults)
@@ -105,9 +104,9 @@ class AuthenticatedOrderApiTests(APITestCase):
         serializer = OrderListSerializer(orders, many=True)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, serializer.data)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]["id"], self.order1.id)
+        self.assertEqual(response.data["results"], serializer.data)
+        self.assertEqual(len(response.data["results"]), 1)
+        self.assertEqual(response.data["results"][0]["id"], self.order1.id)
 
     def test_user_can_retrieve_order_detail(self):
         detail_url = reverse("train_station:order-detail", args=[self.order1.id])
