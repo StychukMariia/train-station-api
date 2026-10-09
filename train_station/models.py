@@ -38,7 +38,7 @@ class TrainType(models.Model):
 class Train(models.Model):
     name = models.CharField(max_length=100)
     cargo_num = models.IntegerField()
-    place_in_cargo = models.IntegerField()
+    places_in_cargo = models.IntegerField()
     train_type = models.ForeignKey(
         TrainType,
         on_delete=models.CASCADE,
@@ -47,7 +47,7 @@ class Train(models.Model):
 
     @property
     def capacity(self) -> int:
-        return self.cargo_num * self.place_in_cargo
+        return self.cargo_num * self.places_in_cargo
 
     def __str__(self):
         return self.name
@@ -108,7 +108,7 @@ class Ticket(models.Model):
     def validate_ticket(cargo, seat, train, error_to_raise):
         for ticket_attr_value, ticket_attr_name, train_attr_name in [
             (cargo, "cargo", "cargo_num"),
-            (seat, "seat", "place_in_cargo"),
+            (seat, "seat", "places_in_cargo"),
         ]:
             count_attrs = getattr(train, train_attr_name)
             if not (1 <= ticket_attr_value <= count_attrs):
