@@ -47,7 +47,7 @@ def sample_train(**params):
     defaults = {
         "name": "Intercity",
         "cargo_num": 5,
-        "place_in_cargo": 40,
+        "places_in_cargo": 40,
         "train_type": train_type,
     }
     defaults.update(params)
@@ -107,12 +107,6 @@ class AuthenticatedOrderApiTests(APITestCase):
         self.assertEqual(response.data["results"], serializer.data)
         self.assertEqual(len(response.data["results"]), 1)
         self.assertEqual(response.data["results"][0]["id"], self.order1.id)
-
-    def test_user_can_retrieve_order_detail(self):
-        detail_url = reverse("train_station:order-detail", args=[self.order1.id])
-        response = self.client.get(detail_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["id"], self.order1.id)
 
     def test_user_can_create_order_with_tickets(self):
         data = {

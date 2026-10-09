@@ -27,7 +27,7 @@ def sample_train(**params):
     defaults = {
         "name": "Intercity+",
         "cargo_num": 8,
-        "place_in_cargo": 50,
+        "places_in_cargo": 50,
         "train_type": train_type,
     }
     defaults.update(params)
@@ -52,7 +52,7 @@ class UnauthenticatedTrainApiTests(APITestCase):
         data = {
             "name": "Express",
             "cargo_num": 5,
-            "place_in_cargo": 40,
+            "places_in_cargo": 40,
             "train_type": train_type.id,
         }
         response = self.client.post(TRAIN_URL, data)
@@ -110,7 +110,7 @@ class AuthenticatedTrainApiTests(APITestCase):
         data = {
             "name": "Express",
             "cargo_num": 6,
-            "place_in_cargo": 45,
+            "places_in_cargo": 45,
             "train_type": self.train_type1.id,
         }
         response = self.client.post(TRAIN_URL, data)
@@ -129,7 +129,7 @@ class AdminTrainApiTests(APITestCase):
         data = {
             "name": "Sapsan",
             "cargo_num": 10,
-            "place_in_cargo": 60,
+            "places_in_cargo": 60,
             "train_type_id": self.train_type.id,
         }
         response = self.client.post(TRAIN_URL, data)

@@ -41,7 +41,7 @@ def sample_train(**params):
     defaults = {
         "name": "Intercity",
         "cargo_num": 5,
-        "place_in_cargo": 40,
+        "places_in_cargo": 40,
         "train_type": train_type,
     }
     defaults.update(params)
