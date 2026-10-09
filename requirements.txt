@@ -4,7 +4,6 @@ black==26.5.1
 click==8.5.0
 colorama==0.4.6
 Django==6.0.4
-django-debug-toolbar==8.0.0
 djangorestframework==3.18.0
 djangorestframework_simplejwt==5.5.1
 drf-spectacular==0.30.0
@@ -18,6 +17,8 @@ pathspec==1.1.1
 pillow==12.3.0
 platformdirs==4.12.2
 pluggy==1.6.0
+psycopg==3.3.6
+psycopg-binary==3.3.6
 Pygments==2.19.2
 PyJWT==2.15.1
 pytest==9.0.2
