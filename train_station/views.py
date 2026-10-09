@@ -185,7 +185,7 @@ class JourneyViewSet(viewsets.ModelViewSet):
         .prefetch_related("crews")
         .annotate(
             tickets_available=(
-                F("train__cargo_num") * F("train__place_in_cargo") - Count("tickets")
+                F("train__cargo_num") * F("train__places_in_cargo") - Count("tickets")
             )
         )
         .order_by("-departure_time")
@@ -232,10 +232,13 @@ class JourneyViewSet(viewsets.ModelViewSet):
 class OrderViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
     viewsets.GenericViewSet,
 ):
-    queryset = Order.objects.all()
+    queryset = Order.objects.prefetch_related(
+        "tickets__journey__train__train_type",
+        "tickets__journey__route__source",
+        "tickets__journey__route__destination",
+    ).all()
     serializer_class = OrderSerializer
     pagination_class = StandardPagination
     permission_classes = (IsAuthenticated,)
@@ -247,7 +250,7 @@ class OrderViewSet(
         return OrderSerializer
 
     def get_queryset(self):
-        return Order.objects.filter(user=self.request.user)
+        return self.queryset.filter(user=self.request.user)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

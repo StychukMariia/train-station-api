@@ -56,7 +56,7 @@ class TrainSerializer(serializers.ModelSerializer):
             "id",
             "name",
             "cargo_num",
-            "place_in_cargo",
+            "places_in_cargo",
             "capacity",
             "train_type",
             "train_type_id",
@@ -112,7 +112,7 @@ class JourneyListSerializer(JourneySerializer):
             return obj.tickets_available
 
         booked_tickets = obj.tickets.count()
-        total_places = obj.train.cargo_num * obj.train.place_in_cargo
+        total_places = obj.train.cargo_num * obj.train.places_in_cargo
         return total_places - booked_tickets
 
 
