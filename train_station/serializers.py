@@ -1,6 +1,7 @@
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError as RestValidationError
+from django.core.exceptions import ValidationError as DjangoValidationError
 
 from train_station.models import (
     Station,
@@ -119,9 +120,14 @@ class JourneyListSerializer(JourneySerializer):
 class TicketSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         data = super(TicketSerializer, self).validate(attrs=attrs)
-        Ticket.validate_ticket(
-            attrs["cargo"], attrs["seat"], attrs["journey"].train, ValidationError
-        )
+        try:
+            Ticket.validate_ticket(
+                attrs["cargo"], attrs["seat"], attrs["journey"], RestValidationError
+            )
+        except DjangoValidationError as e:
+            raise RestValidationError(
+                e.message_dict if hasattr(e, "message_dict") else str(e)
+            )
         return data
 
     class Meta:
@@ -166,12 +172,31 @@ class OrderSerializer(serializers.ModelSerializer):
         fields = ("id", "created_at", "tickets")
 
     def create(self, validated_data):
-        with transaction.atomic():
-            tickets_data = validated_data.pop("tickets")
-            order = Order.objects.create(**validated_data)
-            for ticket_data in tickets_data:
-                Ticket.objects.create(order=order, **ticket_data)
-            return order
+        tickets_data = validated_data.pop("tickets")
+
+        try:
+            with transaction.atomic():
+                journey_ids = [
+                    ticket_data["journey"].id for ticket_data in tickets_data
+                ]
+                Journey.objects.filter(id__in=journey_ids).select_for_update()
+
+                order = Order.objects.create(**validated_data)
+                for ticket_data in tickets_data:
+                    Ticket.validate_ticket(
+                        ticket_data["cargo"],
+                        ticket_data["seat"],
+                        ticket_data["journey"],
+                        RestValidationError,
+                    )
+                    Ticket.objects.create(order=order, **ticket_data)
+                return order
+        except IntegrityError:
+            raise RestValidationError(
+                {
+                    "detail": "A database integrity error occurred. One or more seats might have just been booked by another user."
+                }
+            )
 
 
 class OrderListSerializer(OrderSerializer):

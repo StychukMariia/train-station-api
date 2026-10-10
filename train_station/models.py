@@ -1,5 +1,5 @@
 from django.db import models
-from rest_framework.exceptions import ValidationError
+from django.core.exceptions import ValidationError as DjangoValidationError
 
 from core import settings
 
@@ -105,7 +105,8 @@ class Ticket(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="tickets")
 
     @staticmethod
-    def validate_ticket(cargo, seat, train, error_to_raise):
+    def validate_ticket(cargo, seat, journey, error_to_raise, current_ticket_id=None):
+        train = journey.train
         for ticket_attr_value, ticket_attr_name, train_attr_name in [
             (cargo, "cargo", "cargo_num"),
             (seat, "seat", "places_in_cargo"),
@@ -121,12 +122,25 @@ class Ticket(models.Model):
                     }
                 )
 
+        existing_tickets = Ticket.objects.filter(
+            journey=journey, cargo=cargo, seat=seat
+        )
+        if current_ticket_id:
+            existing_tickets = existing_tickets.exclude(id=current_ticket_id)
+
+        if existing_tickets.exists():
+            raise error_to_raise(
+                {
+                    "non_field_errors": f"This seat (cargo: {cargo}, seat: {seat}) is already booked for this journey."
+                }
+            )
+
     def clean(self):
         Ticket.validate_ticket(
             self.cargo,
             self.seat,
             self.journey.train,
-            ValidationError,
+            DjangoValidationError,
         )
 
     def save(
