@@ -20,7 +20,7 @@ API service for train station management written on Django REST Framework (DRF).
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/danylott/train-station-api.git](https://github.com/danylott/train-station-api.git)
+   git clone [https://github.com/StychukMariia/train-station-api.git](https://github.com/StychukMariia/train-station-api.git)
    cd train-station-api
 
 2. **Configure environment variables:**
