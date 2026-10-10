@@ -4,6 +4,7 @@ from django.db.models import F, Count
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from rest_framework import viewsets, mixins
+from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 
@@ -61,10 +62,16 @@ class RouteViewSet(
         queryset = self.queryset
 
         if source_id_str:
-            queryset = queryset.filter(source_id=int(source_id_str))
+            try:
+                queryset = queryset.filter(source_id=int(source_id_str))
+            except ValueError:
+                raise ValidationError({"source": "A valid integer is required."})
 
         if destination_id_str:
-            queryset = queryset.filter(destination_id=int(destination_id_str))
+            try:
+                queryset = queryset.filter(destination_id=int(destination_id_str))
+            except ValueError:
+                raise ValidationError({"destination": "A valid integer is required."})
 
         return queryset
 
@@ -129,7 +136,10 @@ class TrainViewSet(
             queryset = queryset.filter(name__icontains=name)
 
         if train_type_id_str:
-            queryset = queryset.filter(train_type_id=int(train_type_id_str))
+            try:
+                queryset = queryset.filter(train_type_id=int(train_type_id_str))
+            except ValueError:
+                raise ValidationError({"train_type": "A valid integer is required."})
 
         return queryset
 
@@ -200,8 +210,13 @@ class JourneyViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
 
         if departure_date:
-            date = datetime.strptime(departure_date, "%Y-%m-%d").date()
-            queryset = queryset.filter(departure_time__date=date)
+            try:
+                date = datetime.strptime(departure_date, "%Y-%m-%d").date()
+                queryset = queryset.filter(departure_time__date=date)
+            except ValueError:
+                raise ValidationError(
+                    {"departure_date": "Date has wrong format. Use YYYY-MM-DD format."}
+                )
 
         return queryset
 
