@@ -44,6 +44,33 @@ class StationViewSet(
     serializer_class = StationSerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
+    @extend_schema(
+        summary="List all stations",
+        description="Returns a list of all available train stations. Publicly accessible for reading.",
+        responses={200: StationSerializer(many=True)},
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        summary="Create a new station",
+        description="Allows admin users to create a new train station.",
+        responses={
+            201: StationSerializer,
+            400: OpenApiResponse(
+                description="Validation error (e.g. invalid latitude/longitude range or duplicate name)."
+            ),
+            401: OpenApiResponse(
+                description="Authentication credentials were not provided."
+            ),
+            403: OpenApiResponse(
+                description="Permission denied (admin rights required)."
+            ),
+        },
+    )
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
+
 
 class RouteViewSet(
     mixins.CreateModelMixin,
@@ -85,6 +112,8 @@ class RouteViewSet(
         return RouteSerializer
 
     @extend_schema(
+        summary="List and filter routes",
+        description="Retrieve routes with optional filtering by source and destination station IDs.",
         parameters=[
             OpenApiParameter(
                 name="source",
@@ -100,10 +129,27 @@ class RouteViewSet(
                 description="Filter routes by destination station ID (e.g. ?destination=2)",
                 required=False,
             ),
-        ]
+        ],
+        responses={
+            200: RouteListSerializer(many=True),
+            400: OpenApiResponse(
+                description="Invalid query parameter format (non-integer ID provided)."
+            ),
+        },
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
+
+    @extend_schema(
+        summary="Get route details",
+        description="Retrieve detailed information about a specific route by its ID.",
+        responses={
+            200: RouteDetailSerializer,
+            404: OpenApiResponse(description="Route not found."),
+        },
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
 
 
 class TrainTypeViewSet(
@@ -150,6 +196,8 @@ class TrainViewSet(
         return TrainSerializer
 
     @extend_schema(
+        summary="List and filter trains",
+        description="Retrieve trains with optional filtering by name or train type ID.",
         parameters=[
             OpenApiParameter(
                 name="name",
@@ -165,7 +213,11 @@ class TrainViewSet(
                 description="Filter trains by train type ID (e.g. ?train_type=1)",
                 required=False,
             ),
-        ]
+        ],
+        responses={
+            200: TrainListSerializer(many=True),
+            400: OpenApiResponse(description="Invalid train_type parameter format."),
+        },
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
