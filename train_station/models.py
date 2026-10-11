@@ -18,11 +18,11 @@ class Station(models.Model):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                check=Q(latitude__gte=-90.0) & Q(latitude__lte=90.0),
+                condition=Q(latitude__gte=-90.0) & Q(latitude__lte=90.0),
                 name="latitude_valid_range",
             ),
             models.CheckConstraint(
-                check=Q(longitude__gte=-180.0) & Q(longitude__lte=180.0),
+                condition=Q(longitude__gte=-180.0) & Q(longitude__lte=180.0),
                 name="longitude_valid_range",
             ),
         ]
@@ -46,11 +46,11 @@ class Route(models.Model):
         unique_together = ("source", "destination")
         constraints = [
             models.CheckConstraint(
-                check=Q(distance__gt=0),
+                condition=Q(distance__gt=0),
                 name="route_distance_positive",
             ),
             models.CheckConstraint(
-                check=~Q(source=F("destination")),
+                condition=~Q(source=F("destination")),
                 name="source_destination_different",
             ),
         ]
@@ -90,11 +90,11 @@ class Train(models.Model):
     class Meta:
         constraints = [
             models.CheckConstraint(
-                check=Q(cargo_num__gt=0),
+                condition=Q(cargo_num__gt=0),
                 name="train_cargo_num_positive",
             ),
             models.CheckConstraint(
-                check=Q(places_in_cargo__gt=0),
+                condition=Q(places_in_cargo__gt=0),
                 name="train_places_in_cargo_positive",
             ),
         ]
@@ -205,7 +205,7 @@ class Ticket(models.Model):
         Ticket.validate_ticket(
             self.cargo,
             self.seat,
-            self.journey.train,
+            self.journey,
             DjangoValidationError,
         )
 
@@ -222,11 +222,11 @@ class Ticket(models.Model):
         ordering = ["cargo", "seat"]
         constraints = [
             models.CheckConstraint(
-                check=Q(cargo__gt=0),
+                condition=Q(cargo__gt=0),
                 name="ticket_cargo_positive",
             ),
             models.CheckConstraint(
-                check=Q(seat__gt=0),
+                condition=Q(seat__gt=0),
                 name="ticket_seat_positive",
             ),
         ]
