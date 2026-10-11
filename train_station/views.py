@@ -2,7 +2,7 @@ from datetime import datetime
 
 from django.db.models import F, Count
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse
 from rest_framework import viewsets, mixins
 from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import PageNumberPagination
@@ -238,7 +238,14 @@ class JourneyViewSet(viewsets.ModelViewSet):
                 description="Filter journeys by departure date (format: YYYY-MM-DD)",
                 required=False,
             ),
-        ]
+        ],
+        responses={
+            200: JourneyListSerializer(many=True),
+            400: OpenApiResponse(
+                description="Invalid date format provided for departure_date query parameter."
+            ),
+        },
+        summary="List and filter journeys",
     )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
@@ -269,3 +276,19 @@ class OrderViewSet(
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+    @extend_schema(
+        summary="Create a new order with tickets",
+        description="Allows an authenticated user to book tickets for a specific journey. Validates seat availability and handles race conditions.",
+        responses={
+            201: OrderSerializer,
+            400: OpenApiResponse(
+                description="Validation error (e.g., seat already booked, invalid range, or empty tickets)."
+            ),
+            401: OpenApiResponse(
+                description="Authentication credentials were not provided."
+            ),
+        },
+    )
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
