@@ -10,48 +10,60 @@ from train_station.serializers import JourneyListSerializer, JourneyDetailSerial
 JOURNEY_URL = reverse("train_station:journey-list")
 
 
-def sample_station(**params):
-    defaults = {"name": "Kyiv", "latitude": 50.4, "longitude": 30.5}
+def sample_station(name="Kyiv", **params):
+    defaults = {
+        "latitude": 50.4501,
+        "longitude": 30.5234,
+    }
     defaults.update(params)
-    return Station.objects.create(**defaults)
+    station, _ = Station.objects.get_or_create(name=name, defaults=defaults)
+    return station
 
 
 def sample_route(**params):
-    source = params.pop("source", None)
-    destination = params.pop("destination", None)
-    if not source:
-        source = sample_station(name="Kyiv")
-    if not destination:
-        destination = sample_station(name="Lviv", latitude=49.8, longitude=24.0)
-    defaults = {"source": source, "destination": destination, "distance": 500}
-    defaults.update(params)
-    return Route.objects.create(**defaults)
-
-
-def sample_train_type(**params):
-    defaults = {"name": "Electric"}
-    defaults.update(params)
-    return TrainType.objects.create(**defaults)
-
-
-def sample_train(**params):
-    train_type = params.pop("train_type", None)
-    if not train_type:
-        train_type = sample_train_type()
+    source = sample_station(name="Kyiv")
+    destination = sample_station(name="Lviv")
     defaults = {
-        "name": "Intercity",
+        "source": source,
+        "destination": destination,
+        "distance": 500,
+    }
+    defaults.update(params)
+
+    route, _ = Route.objects.get_or_create(
+        source=defaults["source"],
+        destination=defaults["destination"],
+        defaults={"distance": defaults["distance"]},
+    )
+    return route
+
+
+def sample_train_type(name="Electric", **params):
+    defaults = {}
+    defaults.update(params)
+    train_type, _ = TrainType.objects.get_or_create(name=name, defaults=defaults)
+    return train_type
+
+
+def sample_train(name="Intercity", **params):
+    train_type = sample_train_type()
+    defaults = {
         "cargo_num": 5,
         "places_in_cargo": 40,
         "train_type": train_type,
     }
     defaults.update(params)
-    return Train.objects.create(**defaults)
+
+    train, _ = Train.objects.get_or_create(name=name, defaults=defaults)
+    return train
 
 
 def sample_crew(**params):
-    defaults = {"first_name": "Ivan", "last_name": "Franko"}
+    defaults = {"last_name": "Franko"}
     defaults.update(params)
-    return Crew.objects.create(**defaults)
+    first_name = defaults.pop("first_name", "Ivan")
+    crew, _ = Crew.objects.get_or_create(first_name=first_name, defaults=defaults)
+    return crew
 
 
 def sample_journey(**params):
@@ -68,7 +80,14 @@ def sample_journey(**params):
         "arrival_time": "2026-10-15T14:00:00Z",
     }
     defaults.update(params)
-    journey = Journey.objects.create(**defaults)
+
+    journey, _ = Journey.objects.get_or_create(
+        route=defaults["route"],
+        train=defaults["train"],
+        departure_time=defaults["departure_time"],
+        defaults={"arrival_time": defaults["arrival_time"]},
+    )
+
     crew = sample_crew()
     journey.crews.add(crew)
     return journey

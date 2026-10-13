@@ -15,7 +15,9 @@ TRAIN_URL = reverse("train_station:train-list")
 def sample_train_type(**params):
     defaults = {"name": "Electric"}
     defaults.update(params)
-    return TrainType.objects.create(**defaults)
+    name = defaults.pop("name")
+    train_type, _ = TrainType.objects.get_or_create(name=name, defaults=defaults)
+    return train_type
 
 
 def sample_train(**params):
@@ -25,13 +27,15 @@ def sample_train(**params):
         train_type = sample_train_type()
 
     defaults = {
-        "name": "Intercity+",
         "cargo_num": 8,
         "places_in_cargo": 50,
         "train_type": train_type,
     }
     defaults.update(params)
-    return Train.objects.create(**defaults)
+    name = defaults.pop("name", "Intercity+")
+
+    train, _ = Train.objects.get_or_create(name=name, defaults=defaults)
+    return train
 
 
 class TrainModelTests(APITestCase):

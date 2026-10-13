@@ -12,14 +12,14 @@ from train_station.serializers import (
 ROUTE_URL = reverse("train_station:route-list")
 
 
-def sample_station(**params):
+def sample_station(name="Kyiv", **params):
     defaults = {
-        "name": "Kyiv",
-        "latitude": 50.4402,
-        "longitude": 30.4883,
+        "latitude": 50.4501,
+        "longitude": 30.5234,
     }
     defaults.update(params)
-    return Station.objects.create(**defaults)
+    station, _ = Station.objects.get_or_create(name=name, defaults=defaults)
+    return station
 
 
 def sample_route(**params):
