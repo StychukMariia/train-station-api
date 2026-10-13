@@ -1,6 +1,6 @@
-from django.db import transaction, IntegrityError
+from django.db import transaction
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError as RestValidationError
+from rest_framework.exceptions import ValidationError as DRFValidationError
 from django.core.exceptions import ValidationError as DjangoValidationError
 
 from train_station.models import (
@@ -25,6 +25,22 @@ class RouteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Route
         fields = ("id", "source", "destination", "distance")
+
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        source = data.get("source")
+        destination = data.get("destination")
+        distance = data.get("distance")
+
+        if source and destination and source == destination:
+            raise serializers.ValidationError(
+                {"destination": "Source and destination stations must be different."}
+            )
+        if distance is not None and distance <= 0:
+            raise serializers.ValidationError(
+                {"distance": "Distance must be a positive integer."}
+            )
+        return data
 
 
 class RouteListSerializer(RouteSerializer):
@@ -81,6 +97,17 @@ class JourneySerializer(serializers.ModelSerializer):
         model = Journey
         fields = ("id", "route", "train", "departure_time", "arrival_time", "crews")
 
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        departure_time = data.get("departure_time")
+        arrival_time = data.get("arrival_time")
+
+        if departure_time and arrival_time and arrival_time <= departure_time:
+            raise serializers.ValidationError(
+                {"arrival_time": "Arrival time must be later than departure time."}
+            )
+        return data
+
 
 class JourneyListSerializer(JourneySerializer):
     route_source = serializers.CharField(source="route.source.name", read_only=True)
@@ -122,10 +149,10 @@ class TicketSerializer(serializers.ModelSerializer):
         data = super(TicketSerializer, self).validate(attrs=attrs)
         try:
             Ticket.validate_ticket(
-                attrs["cargo"], attrs["seat"], attrs["journey"], RestValidationError
+                attrs["cargo"], attrs["seat"], attrs["journey"], DRFValidationError
             )
         except DjangoValidationError as e:
-            raise RestValidationError(
+            raise DRFValidationError(
                 e.message_dict if hasattr(e, "message_dict") else str(e)
             )
         return data
@@ -174,29 +201,38 @@ class OrderSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         tickets_data = validated_data.pop("tickets")
 
-        try:
-            with transaction.atomic():
-                journey_ids = [
-                    ticket_data["journey"].id for ticket_data in tickets_data
-                ]
+        with transaction.atomic():
+            journey_ids = [ticket_data["journey"].id for ticket_data in tickets_data]
+            journeys = list(
                 Journey.objects.filter(id__in=journey_ids).select_for_update()
-
-                order = Order.objects.create(**validated_data)
-                for ticket_data in tickets_data:
-                    Ticket.validate_ticket(
-                        ticket_data["cargo"],
-                        ticket_data["seat"],
-                        ticket_data["journey"],
-                        RestValidationError,
-                    )
-                    Ticket.objects.create(order=order, **ticket_data)
-                return order
-        except IntegrityError:
-            raise RestValidationError(
-                {
-                    "detail": "A database integrity error occurred. One or more seats might have just been booked by another user."
-                }
             )
+            journey_map = {j.id: j for j in journeys}
+
+            for journey_id in set(journey_ids):
+                journey = journey_map.get(journey_id)
+                if not journey:
+                    raise DRFValidationError(
+                        {"journey": f"Journey with id {journey_id} does not exist."}
+                    )
+
+                total_capacity = journey.train.cargo_num * journey.train.places_in_cargo
+                booked_tickets_count = journey.tickets.count()
+                requested_tickets_count = sum(
+                    1 for t in tickets_data if t["journey"].id == journey_id
+                )
+
+                if booked_tickets_count + requested_tickets_count > total_capacity:
+                    raise DRFValidationError(
+                        {
+                            "non_field_errors": f"Journey (id={journey.id}) is fully booked or does not have enough available seats."
+                        }
+                    )
+
+            order = Order.objects.create(**validated_data)
+            for ticket_data in tickets_data:
+                Ticket.objects.create(order=order, **ticket_data)
+
+        return order
 
 
 class OrderListSerializer(OrderSerializer):

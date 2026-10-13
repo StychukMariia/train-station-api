@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   app:
     build:
@@ -11,7 +13,8 @@ services:
              python manage.py migrate && 
              python manage.py runserver 0.0.0.0:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       - ./:/app
       - my_media:/vol/web/media
@@ -27,7 +30,7 @@ services:
     volumes:
       - my_db:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 5s
       timeout: 5s
       retries: 5

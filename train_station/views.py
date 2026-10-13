@@ -331,11 +331,15 @@ class OrderViewSet(
 
     @extend_schema(
         summary="Create a new order with tickets",
-        description="Allows an authenticated user to book tickets for a specific journey. Validates seat availability and handles race conditions.",
+        description="Allows an authenticated user to book tickets. Uses atomic transactions, row-level locking (select_for_update), and capacity validation.",
         responses={
             201: OrderSerializer,
             400: OpenApiResponse(
-                description="Validation error (e.g., seat already booked, invalid range, or empty tickets)."
+                description="Validation error cases:\n"
+                "- Seat already booked for this journey.\n"
+                "- Journey is fully booked / not enough seats.\n"
+                "- Cargo or seat number out of valid train range.\n"
+                "- Missing or invalid ticket data."
             ),
             401: OpenApiResponse(
                 description="Authentication credentials were not provided."
